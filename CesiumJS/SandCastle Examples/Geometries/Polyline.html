@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CesiumJS Example</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #cesiumContainer {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+
+    <script>
+        /**
+         * Polyline: new Cesium.PolylineGraphics(options)
+         * 전달되는 두 좌표 정보로 선분 위치를 position's' 속성으로 정의하고 추가되는 위치들은 전 위치에서 이어지는 새 선분을 정의한다.
+         */
+        let viewer;
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlMWExMWI1NS0xMTQ4LTRjOGUtYjlmMy05ZjY2OTQ5NDAxNWMiLCJpZCI6MjAzNzAxLCJpYXQiOjE3MTEwODE4NzB9.MD30NLIYunpK1t_au94gmZq9spoLSSsFtxu2CG5MO7s';
+
+        // CesiumJS 비동기 초기화 함수
+        async function initializeCesium() {
+            try {
+                viewer = new Cesium.Viewer('cesiumContainer');
+
+                const redLine = viewer.entities.add({
+                    name: "Red line on terrain",
+                    polyline: {
+                        positions: Cesium.Cartesian3.fromDegreesArray([-75, 35, -125, 35]),
+                        width: 5,
+                        material: Cesium.Color.RED,
+                        clampToGround: true,
+                    },
+                });
+
+                const orangeOutlined = viewer.entities.add({
+                    name:
+                        "높이가 있는 두 지점을 잇는 선분(표면을 따라 그려짐)",
+                    polyline: {
+                        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+                        -75,
+                        39,
+                        250000,
+                        -125,
+                        39,
+                        250000,
+                        ]),
+                        width: 5,
+                        material: new Cesium.PolylineOutlineMaterialProperty({
+                        color: Cesium.Color.ORANGE,
+                        outlineWidth: 2,
+                        outlineColor: Cesium.Color.BLACK,
+                        }),
+                    },
+                });
+
+                const purpleArrow = viewer.entities.add({
+                    name: "Purple straight arrow at height",
+                    polyline: {
+                        // height가 주어진 좌표배열 => 두 지점을 잇는 선분을 생성한다.
+                        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+                        -75,
+                        43,
+                        500000,
+                        -125,
+                        43,
+                        500000,
+                        ]),
+                        width: 10,
+                        arcType: Cesium.ArcType.NONE,
+                        material: new Cesium.PolylineArrowMaterialProperty(
+                        Cesium.Color.PURPLE
+                        ),
+                    },
+                });
+
+                const dashedLine = viewer.entities.add({
+                    name: "Blue dashed line",
+                    polyline: {
+                        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+                        -75,
+                        45,
+                        500000,
+                        -125,
+                        45,
+                        500000,
+                        ]),
+                        width: 4,
+                        // 점선 속성을 위해 material을 점선Material을 전달한다.
+                        material: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.CYAN,
+                        }),
+                    },
+                });
+
+                viewer.zoomTo(viewer.entities);
+
+            } catch (error) {
+                console.error("CesiumJS 초기화 중 오류가 발생.", error);
+            }
+        }
+
+        initializeCesium();
+
+    </script>
+</body>
+</html>

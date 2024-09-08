@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CesiumJS Example</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #cesiumContainer {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+
+    <script>
+        /**
+         * Corridor : 회랑 엔티티
+         * new Cesium.CorridorGraphics(options)
+         * Cartesian 좌표 배열로 생성한 회랑 엔티티를 생성한다.
+         * 
+         * Cesium.Cartesian3.fromDegreesArray(coordinates, ellipsoid, result)
+         * 위경도 도값의 배열을 반환한다.
+         * 회랑 엔티티는 position's'의 특성값으로 위 배열을 전달받고 객체를 생성한다. 
+         * 
+         * cornerType : Property|undefined
+         * 코너 부분의 스타일을 설정한다.
+         * ROUNDED: 꺾이는 지점에서 모서리를 부드럽고 둥글게 처리
+         * MITERED: 꺾이는 지점을 직각으로 처리
+         * BEVELED: 꺾이는 지점의 모서리를 각지지 않게 사선으로 깎아 부드럽게 처리
+         */
+        let viewer;
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlMWExMWI1NS0xMTQ4LTRjOGUtYjlmMy05ZjY2OTQ5NDAxNWMiLCJpZCI6MjAzNzAxLCJpYXQiOjE3MTEwODE4NzB9.MD30NLIYunpK1t_au94gmZq9spoLSSsFtxu2CG5MO7s';
+
+        // CesiumJS 비동기 초기화 함수
+        async function initializeCesium() {
+            try {
+                viewer = new Cesium.Viewer('cesiumContainer');
+
+                const redCorridor = viewer.entities.add({
+                name: "둥근 모서리의 붉은 회랑 엔티티",
+                corridor: {
+                    positions: Cesium.Cartesian3.fromDegreesArray([
+                    -100.0,
+                    40.0,
+                    -105.0,
+                    40.0,
+                    -105.0,
+                    35.0,
+                    ]),
+                    width: 200000.0,
+                    material: Cesium.Color.RED.withAlpha(0.5),
+                },
+                });
+
+                const greenCorridor = viewer.entities.add({
+                name: "각진 모서리의 초록 회랑 엔티티",
+                corridor: {
+                    positions: Cesium.Cartesian3.fromDegreesArray([
+                    -90.0,
+                    40.0,
+                    -95.0,
+                    40.0,
+                    -95.0,
+                    35.0,
+                    ]),
+                    height: 100000.0,
+                    width: 200000.0,
+                    cornerType: Cesium.CornerType.MITERED,
+                    material: Cesium.Color.GREEN,
+                    outline: true,
+                },
+                });
+
+                const blueCorridor = viewer.entities.add({
+                name: "깎인 모서리의 파랑 회랑 엔티티",
+                corridor: {
+                    positions: Cesium.Cartesian3.fromDegreesArray([
+                    -80.0,
+                    40.0,
+                    -85.0,
+                    40.0,
+                    -85.0,
+                    35.0,
+                    ]),
+                    height: 200000.0,
+                    extrudedHeight: 100000.0,
+                    width: 200000.0,
+                    cornerType: Cesium.CornerType.BEVELED,
+                    material: Cesium.Color.BLUE.withAlpha(0.5),
+                    outline: true,
+                    outlineColor: Cesium.Color.WHITE,
+                },
+                });
+
+                viewer.zoomTo(viewer.entities);
+
+            } catch (error) {
+                console.error("CesiumJS 초기화 중 오류가 발생.", error);
+            }
+        }
+
+        initializeCesium();
+
+    </script>
+</body>
+</html>

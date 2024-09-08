@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CesiumJS Example</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #cesiumContainer {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+
+    <script>
+        let viewer;
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlMWExMWI1NS0xMTQ4LTRjOGUtYjlmMy05ZjY2OTQ5NDAxNWMiLCJpZCI6MjAzNzAxLCJpYXQiOjE3MTEwODE4NzB9.MD30NLIYunpK1t_au94gmZq9spoLSSsFtxu2CG5MO7s';
+
+        // CesiumJS 비동기 초기화 함수
+        async function initializeCesium() {
+            try {
+                viewer = new Cesium.Viewer('cesiumContainer');
+
+            } catch (error) {
+                console.error("CesiumJS 초기화 중 오류가 발생.", error);
+            }
+        }
+
+        initializeCesium();
+
+    </script>
+</body>
+</html>

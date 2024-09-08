@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CesiumJS Example</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #cesiumContainer {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls select {
+            padding: 5px;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+    <div class="controls">
+        <select id="shapeSelector">
+            <option value="polygons">Polygons</option>
+            <option value="boxes">Boxes, Cylinders and Ellipsoids</option>
+        </select>
+
+        <select id="terrainSelector">
+            <option value="enabled">Terrain Enabled</option>
+            <option value="disabled">Terrain Disabled</option>
+        </select>
+    </div>
+    <script>
+        let viewer;
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlMWExMWI1NS0xMTQ4LTRjOGUtYjlmMy05ZjY2OTQ5NDAxNWMiLCJpZCI6MjAzNzAxLCJpYXQiOjE3MTEwODE4NzB9.MD30NLIYunpK1t_au94gmZq9spoLSSsFtxu2CG5MO7s';
+
+        // 지형이 비활성화된 상태 때 제공하는 기본 타원체 지형 Provider 설정
+        const ellipsoidTerrainProvider = new Cesium.EllipsoidTerrainProvider();
+        const worldTerrain = Cesium.Terrain.fromWorldTerrain();
+        const longitude = 6.950615989890521;
+        const latitude = 45.79546589994886;
+        const delta = 0.001;
+
+        // CesiumJS 비동기 초기화 함수
+        async function initializeCesium() {
+            try {
+                viewer = new Cesium.Viewer('cesiumContainer', {
+                    baseLayerPicker: false,
+                    terrain: worldTerrain
+                });
+
+                // 폴리곤이 지형에 파묻히지 않게 하기위해 depthTest가 필요하다.
+                // 해당 설정으로 도형이 지형 위에 고정될 수 있다!
+                viewer.scene.globe.depthTestAgainstTerrain = true;
+                addPolygons();
+                
+                // 셀렉트 박스 이벤트 등록
+                document.getElementById('shapeSelector').addEventListener('change', function() {
+                    const selectedShape = this.value;
+                    viewer.entities.removeAll();
+
+                    if (selectedShape === 'polygons') {
+                        addPolygons();
+                    } else {
+                        addGeometries();
+                    }
+                });
+
+                document.getElementById('terrainSelector').addEventListener('change', function() {
+                    const terrainState = this.value;
+
+                    if (terrainState === 'enabled') {
+                        viewer.scene.terrainProvider = worldTerrain;
+                    } else {
+                        viewer.scene.terrainProvider = ellipsoidTerrainProvider;
+                    }
+                });
+
+            } catch (error) {
+                console.error("CesiumJS 초기화 중 오류가 발생.", error);
+            }
+        }
+
+        // 폴리곤 추가 함수
+        // 폴리곤의 각 면은 Cesium.Cartesian3.fromDegrees 함수를 사용하여 위도, 경도를 기반으로 좌표가 전달된다.
+        function addPolygons() {
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    addPolygon(i, j);
+                }
+            }
+            viewer.camera.lookAt(
+                Cesium.Cartesian3.fromDegrees(longitude, latitude, 1500),
+                new Cesium.HeadingPitchRange(
+                    -Cesium.Math.PI / 2,
+                    -Cesium.Math.PI_OVER_FOUR,
+                    2000
+                )
+            );
+            // viewer.camera.lookAtTransform(transform, offset)
+            // 변환 행렬과 타겟으로 카메라 위치와 원점을 설정한다.
+            // offset은 cartesian 좌표나 h/p/r이 될 수 있음.
+            viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+        }
+
+        // 개별 폴리곤을 추가하는 함수
+        // 4개의 꼭짓점은 위도와 경도에 따라 결정되며 hierarchy 프로퍼티에 각 위치 배열이 전달된다.
+
+        // heightReference : 엔티티의 terrain에 상대적인 position을 나타낸다. 지구 표면이나 지형을 기준으로 어떻게 표현될 지 결정함. 
+        // RELATIVE_TO_GROUND는 terrain과 3D 타일 위에서 상대적인 높이를 의미.
+
+        // extrudedHeightReference : 폴리곤이나 지오메트리의 돌출된 부분이 지표면이나 지형을 기준으로 어디에서 끝날지를 결정한다.
+        
+        function addPolygon(i, j) {
+            const west = longitude + delta * i;
+            const east = longitude + delta * i + delta;
+            const south = latitude + delta * j;
+            const north = latitude + delta * j + delta;
+
+            const positions = [
+                Cesium.Cartesian3.fromDegrees(west, south),
+                Cesium.Cartesian3.fromDegrees(west, north),
+                Cesium.Cartesian3.fromDegrees(east, north),
+                Cesium.Cartesian3.fromDegrees(east, south),
+            ];
+
+            viewer.entities.add({
+                polygon: {
+                    hierarchy: positions,
+                    material: Cesium.Color.fromRandom({ alpha: 1 }),
+                    height: 40.0,
+                    heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                    extrudedHeight: 0.0,
+                    extrudedHeightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                },
+            });
+        }
+
+        function addGeometries() {
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    addGeometry(i, j);
+                }
+            }
+            viewer.zoomTo(viewer.entities);
+        }
+
+        function addGeometry(i, j) {
+            const west = longitude + delta * i;
+            const north = latitude + delta * j + delta;
+            const type = Math.floor(Math.random() * 3);
+
+            if (type === 0) {
+                viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(west, north, 0.0),
+                    box: {
+                        dimensions: new Cesium.Cartesian3(40.0, 30.0, 50.0),
+                        material: Cesium.Color.fromRandom({ alpha: 1.0 }),
+                        // 객체의 위치가 지표면이나 terrain에 딱붙어서 시작함.
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    },
+                });
+            } else if (type === 1) {
+                viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(west, north, 0.0),
+                    cylinder: {
+                        length: 50.0,
+                        topRadius: 20.0,
+                        bottomRadius: 20.0,
+                        material: Cesium.Color.fromRandom({ alpha: 1.0 }),
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    },
+                });
+            } else {
+                viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(west, north, 0.0),
+                    ellipsoid: {
+                        radii: new Cesium.Cartesian3(20.0, 15.0, 25.0),
+                        material: Cesium.Color.fromRandom({ alpha: 1.0 }),
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    },
+                });
+            }
+        }
+
+        initializeCesium();
+    </script>
+</body>
+</html>

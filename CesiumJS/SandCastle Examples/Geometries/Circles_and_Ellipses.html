@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CesiumJS Example</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #cesiumContainer {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+
+    <script>
+        /**
+         * Circles_and_Ellipses : 원과 타원체 생성
+         * Cartesian 좌표로 생성한 원과 타원체 엔티티를 생성한다.
+         * 
+         * Cesium.Cartesian3.fromDegrees
+         * 위경도 도값을 바탕으로 Cartesian3 위치 좌표를 반환한다.
+         * 
+         * 타원체는 EllipseGraphics 생성자로 생성하며 각 프로퍼티를 설정할 수 있다.
+         * semiMinorAxis와 semiMajorAxis 프로퍼티로 타원체의 장축과 단축을 미터 단위로 정의한다.
+         */
+        let viewer;
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlMWExMWI1NS0xMTQ4LTRjOGUtYjlmMy05ZjY2OTQ5NDAxNWMiLCJpZCI6MjAzNzAxLCJpYXQiOjE3MTEwODE4NzB9.MD30NLIYunpK1t_au94gmZq9spoLSSsFtxu2CG5MO7s';
+
+        // CesiumJS 비동기 초기화 함수
+        async function initializeCesium() {
+            try {
+                viewer = new Cesium.Viewer('cesiumContainer');
+
+                const greenCircle = viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(-111.0, 40.0, 150000.0),
+                    name: "높이가 지정된 녹색 원 엔티티",
+                    ellipse: {
+                        semiMinorAxis: 300000.0,
+                        semiMajorAxis: 300000.0,
+                        height: 200000.0,
+                        material: Cesium.Color.GREEN,
+                        outline: true,
+                    },
+                });
+
+                const redEllipse = viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(-103.0, 40.0),
+                    name: "지구 표면 위의 빨강 타원체",
+                    ellipse: {
+                        semiMinorAxis: 250000.0,
+                        semiMajorAxis: 400000.0,
+                        material: Cesium.Color.RED.withAlpha(0.5),
+                    },
+                });
+
+                const blueEllipse = viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(-95.0, 40.0, 100000.0),
+                    name: "반투명한 파란색, 회전, 돌출된 타원체",
+                        ellipse: {
+                            semiMinorAxis: 150000.0,
+                            semiMajorAxis: 300000.0,
+                            extrudedHeight: 200000.0,
+                            rotation: Cesium.Math.toRadians(45),
+                            material: Cesium.Color.BLUE.withAlpha(0.5),
+                            outline: true,
+                        },
+                });
+
+                viewer.zoomTo(viewer.entities);
+
+            } catch (error) {
+                console.error("CesiumJS 초기화 중 오류가 발생.", error);
+            }
+        }
+
+        initializeCesium();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CesiumJS Example</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #cesiumContainer {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+
+    <script>
+         /**
+         * Box : 육면체 엔티티 생성
+         * new Cesium.BoxGraphics(options)
+         * 
+         * Cartesian 좌표로 생성한 박스(상자) 엔티티를 생성한다.
+         * 
+         * dimensions : Box 엔티티는 polyline이나 corridor 등과는 달리, positions가 아닌,
+         * dimensions 프로퍼티로 박스의 크기를 X, Y, Z 축 방향으로 정의한다. (단위: 미터)
+         * 
+         * 
+         * fill: fill 프로퍼티가 false로 설정되면, 박스 내부는 채워지지 않고 외곽선만 표시된다.
+         */
+        let viewer;
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlMWExMWI1NS0xMTQ4LTRjOGUtYjlmMy05ZjY2OTQ5NDAxNWMiLCJpZCI6MjAzNzAxLCJpYXQiOjE3MTEwODE4NzB9.MD30NLIYunpK1t_au94gmZq9spoLSSsFtxu2CG5MO7s';
+
+        // CesiumJS 비동기 초기화 함수
+        async function initializeCesium() {
+            try {
+                viewer = new Cesium.Viewer('cesiumContainer');
+
+                const blueBox = viewer.entities.add({
+                    name: "Blue box",
+                    position: Cesium.Cartesian3.fromDegrees(-114.0, 40.0, 300000.0),
+                    box: {
+                        dimensions: new Cesium.Cartesian3(400000.0, 300000.0, 500000.0),
+                        material: Cesium.Color.BLUE,
+                    },
+                });
+
+                const redBox = viewer.entities.add({
+                    name: "Red box with black outline",
+                    position: Cesium.Cartesian3.fromDegrees(-107.0, 40.0, 300000.0),
+                    box: {
+                        dimensions: new Cesium.Cartesian3(400000.0, 300000.0, 500000.0),
+                        material: Cesium.Color.RED.withAlpha(0.5),
+                        outline: true,
+                        outlineColor: Cesium.Color.BLACK,
+                    },
+                });
+
+                const outlineOnly = viewer.entities.add({
+                    name: "Yellow box outline",
+                    position: Cesium.Cartesian3.fromDegrees(-100.0, 40.0, 300000.0),
+                    box: {
+                        dimensions: new Cesium.Cartesian3(400000.0, 300000.0, 500000.0),
+                        fill: false,
+                        outline: true,
+                        outlineColor: Cesium.Color.YELLOW,
+                    },
+                });
+
+                viewer.zoomTo(viewer.entities);
+
+            } catch (error) {
+                console.error("CesiumJS 초기화 중 오류가 발생.", error);
+            }
+        }
+
+        initializeCesium();
+
+    </script>
+</body>
+</html>
